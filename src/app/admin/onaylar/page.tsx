@@ -10,7 +10,7 @@ import { supabase } from '@/app/lib/supabaseClient';
 
 type Approval = {
   id: string;
-  companyName: string;
+  name: string;
   type: 'registration' | 'update';
   submitted_at: string; // Supabase'den snake_case olarak gelir
   companyId?: string;
@@ -44,15 +44,16 @@ const AdminApprovals: React.FC = () => {
       setErrorMsg(null);
 
       const { data, error } = await supabase
-        .from('pending_approvals')
+        .from('companies')  
         .select('*')
-        .order('submitted_at', { ascending: false });
+          .eq('approved', false);
 
+      console.log('Pending approvals fetched:', data);
       if (error) {
         console.error('Onay bekleyenler çekilemedi:', error.message);
         setErrorMsg('Onay bekleyenler alınırken hata oluştu.');
         setPendingApprovals([]);
-      } else {
+      } else {  
         setPendingApprovals(data || []);
       }
 
@@ -67,11 +68,12 @@ const AdminApprovals: React.FC = () => {
 
     // Eğer onaylama işleminde başka tabloya insert gerekiyorsa burada yapabilirsin.
     // Şimdilik sadece pending_approvals kaydını siliyoruz.
-    const { error } = await supabase
-      .from('pending_approvals')
-      .delete()
-      .eq('id', id);
-
+  
+    const { data, error } = await supabase
+        .from('companies')
+        .update({ approved: 'TRUE' })
+        .eq('id', id)
+        .select()
     if (error) {
       setErrorMsg('Onaylama işlemi sırasında hata oluştu: ' + error.message);
       return;
@@ -158,7 +160,7 @@ const AdminApprovals: React.FC = () => {
                     {pendingApprovals.map((approval) => (
                       <tr key={approval.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{approval.companyName}</div>
+                          <div className="text-sm font-medium text-gray-900">{approval.name}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span
@@ -168,7 +170,7 @@ const AdminApprovals: React.FC = () => {
                                 : 'bg-blue-100 text-blue-800'
                             }`}
                           >
-                            {approval.type === 'registration' ? 'Yeni Kayıt' : 'Profil Güncelleme'}
+                            {approval.type === 'registration' ? 'Profil Güncelleme' : 'Yeni Kayıt'}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -230,7 +232,7 @@ const AdminApprovals: React.FC = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <p className="text-sm text-gray-500">Firma Adı</p>
-                      <p className="font-medium">{selectedApproval.companyName}</p>
+                      <p className="font-medium">{selectedApproval.name}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">İstek Tarihi</p>

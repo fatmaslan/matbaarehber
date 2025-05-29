@@ -28,13 +28,16 @@ const AdminDashboard: React.FC = () => {
   const fetchCounts = async () => {
     const { count: pendingCount } = await supabase
       .from('companies')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'pending');
+      .select('*', )
+        .eq('approved', false);
+    
+    console.log(`Pending Count: ${pendingCount}`);
     setPendingApprovalCount(pendingCount || 0);
 
     const { count: companyCount } = await supabase
       .from('companies')
-      .select('*', { count: 'exact', head: true });
+      .select('*', { count: 'exact', head: true })
+      // Sadece onay bekleyen firmaları say
     setTotalCompanies(companyCount || 0);
 
     const { count: categoryCount } = await supabase

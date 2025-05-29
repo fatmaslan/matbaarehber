@@ -14,7 +14,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signOut: () => Promise<void>; // Çıkış fonksiyonu eklendi
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -31,15 +31,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const getSession = async () => {
-      const { data: sessionData } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
 
-      if (sessionData?.session) {
-        setSession(sessionData.session);
-
-        const { data: userData } = await supabase.auth.getUser();
-        setUser(userData?.user || null);
-      }
-
+      setSession(session || null);
+      setUser(session?.user || null); // 👈 ekstra fetch yok
       setLoading(false);
     };
 
@@ -47,16 +42,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setSession(session);
-
-      if (session) {
-        const { data: userData } = await supabase.auth.getUser();
-        setUser(userData?.user || null);
-      } else {
-        setUser(null);
-        setSession(null);
-      }
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session || null);
+      setUser(session?.user || null); // 👈 yine doğrudan session'dan al
     });
 
     return () => {
@@ -64,7 +52,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  // 🔸 Çıkış işlemi
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -72,9 +59,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signOut }}>
-      {children}
-    </AuthContext.Provider>
+      <AuthContext.Provider value={{ user, session, loading, signOut }}>
+        {children}
+      </AuthContext.Provider>
   );
 };
 
