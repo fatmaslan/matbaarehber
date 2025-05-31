@@ -99,7 +99,7 @@ const Header: React.FC = () => {
                   href="/kayit"
                   className="bg-white text-blue-800 px-4 py-2 rounded-md font-medium hover:bg-blue-100 transition-colors"
                 >
-                  Firma Kaydı
+                  Üye ol
                 </Link>
               </>
             )}

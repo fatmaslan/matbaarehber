@@ -11,6 +11,7 @@ interface RegisterFormData {
   email: string;
   password: string;
   confirmPassword: string;
+  
 }
 
 const RegisterPage: React.FC = () => {
@@ -68,42 +69,63 @@ const handleSubmit = async (e: React.FormEvent) => {
   if (!validate()) return;
 
   if (!recaptchaToken) {
-    setRegisterError('Lütfen güvenlik doğrulamasını tamamlayın.');
+    setRegisterError("Lütfen güvenlik doğrulamasını tamamlayın.");
     return;
   }
 
   setIsLoading(true);
 
   try {
+    // 1. Önce kendi 'users' tablonuzdan e-posta kontrolü yap
+    const { data: existingUsers, error: fetchError } = await supabase
+      .from("users_emails")
+      .select("email")
+      .eq("email", formData.email);
+
+    if (fetchError) {
+      console.error("E-posta kontrol hatası:", fetchError.message);
+      setRegisterError("E-posta kontrolü sırasında bir hata oluştu.");
+      return;
+    }
+
+    if (existingUsers && existingUsers.length > 0) {
+      setRegisterError("Bu e-posta adresi zaten kayıtlı.");
+      return;
+    }
+
+    // 2. Kullanıcıyı Supabase Auth sistemine kaydet
     const { data, error } = await supabase.auth.signUp({
-      email: formData.email,
-      password: formData.password,
-      options: {
-        data: {
-          company_name: formData.companyName,
-        },
-      },
+  email: formData.email,
+  password: formData.password,
+  options: {
+    user_metadata: {
+      company_name: formData.companyName,
+    },
+  },
     });
 
     if (error) {
       setRegisterError(error.message);
-    } else {
-      if (data.user) {
-        await supabase.from('pending_approvals').insert({
-          id: data.user.id,
-          email: formData.email,
-          company_name: formData.companyName,
-        });
-      }
-      router.push('/');
+      return;
     }
+
+    // 3. Eğer kullanıcı başarıyla oluşturulduysa, kendi 'users' tablosuna da ekle
+  
+    
+
+    // 4. Kullanıcıyı giriş sayfasına yönlendir
+    router.push("/giris");
   } catch (error: any) {
-    console.error('Supabase kayıt hatası:', error.message);
-    setRegisterError('Kayıt sırasında bir hata oluştu.');
+    console.error("Kayıt hatası:", error.message);
+    setRegisterError("Kayıt sırasında beklenmeyen bir hata oluştu.");
   } finally {
     setIsLoading(false);
   }
 };
+
+
+
+
   const handleRecaptchaChange = (token: string | null) => {
     setRecaptchaToken(token);
   };
@@ -111,9 +133,9 @@ const handleSubmit = async (e: React.FormEvent) => {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
         <div className="bg-gradient-to-r from-blue-900 to-blue-700 px-6 py-8 text-white text-center">
-          <h1 className="text-2xl font-bold">Firma Kaydı</h1>
+          <h1 className="text-2xl font-bold">Kayıt olmak için doldurunuz</h1>
           <p className="mt-2 text-blue-100">
-            Matbaa Rehberi ne firmanızı ekleyin
+            Matbaa Rehberi ne kayıt olup kolayca firmanızı ekleyin
           </p>
         </div>
 

@@ -74,15 +74,17 @@ const LoginPage: React.FC = () => {
       password: formData.password,
     });
 
-    if (error) {
-      setLoginError('Giriş yapılamadı. Lütfen bilgilerinizi kontrol edin.');
-    } else {
+   if (error) {
+  if (error.message === 'Email not confirmed') {
+    setLoginError('Lütfen e-posta adresinizi onaylayın.');
+  }  else {
       const next = searchParams.get("next");
       router.push(next || '/');
     }
 
     setIsLoading(false);
   };
+}
   const handleRecaptchaChange = (token: string | null) => {
     setRecaptchaToken(token);
   };
