@@ -3,17 +3,16 @@ export interface Company {
   name: string;
   description: string;
   logo?: string;
+  sub: string;
   address: string;
   phone: string;
   fax?: string;
   email: string;
   website?: string;
-  socialMedia?: {
-    facebook?: string;
-    instagram?: string;
-    twitter?: string;
-    linkedin?: string;
-  };
+  facebook?: string;
+  instagram?: string;
+  twitter?: string;
+  linkedin?: string;
   location?: {
     lat: number;
     lng: number;
@@ -21,7 +20,7 @@ export interface Company {
   categoryIds: string[];
   subcategoryIds: string[];
   images: string[];
-  productImages: string[];
+  productimages: string[];
   isApproved: boolean;
   createdAt: string;
   updatedAt: string;
@@ -31,18 +30,17 @@ export interface Category {
   id: string;
   name: string;
   description?: string;
-  category_id? :string ;
+  category_id?: string;
   subcategories: Subcategory[];
   slug: string;
-  type: 'fason' | 'uretim';
-  
+  type: "fason" | "uretim";
 }
 
 export interface Subcategory {
   id: string;
   name: string;
   description: string;
-  category_id?:string ;
+  category_id?: string;
   slug: string;
 }
 
@@ -92,7 +90,7 @@ export interface Advertisement {
   title: string;
   imageUrl: string;
   link: string;
-  position: 'header' | 'sidebar' | 'footer';
+  position: "header" | "sidebar" | "footer";
   startDate: string;
   endDate: string;
   isActive: boolean;
@@ -102,9 +100,9 @@ export interface Notification {
   id: string;
   title: string;
   message: string;
-  type: 'email' | 'push' | 'both';
-  recipients: 'all' | string[];
+  type: "email" | "push" | "both";
+  recipients: "all" | string[];
   scheduledFor?: string;
   sentAt?: string;
-  status: 'draft' | 'scheduled' | 'sent' | 'failed';
+  status: "draft" | "scheduled" | "sent" | "failed";
 }

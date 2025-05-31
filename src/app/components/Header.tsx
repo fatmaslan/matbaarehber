@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 import { Menu, X, ChevronDown, Printer } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -22,19 +22,21 @@ const Header: React.FC = () => {
     router.push("/");
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    };
 
-useEffect(() => {
-  const handleClickOutside = (event: MouseEvent) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-      setDropdownOpen(false);
-    }
-  };
-
-  document.addEventListener('mousedown', handleClickOutside);
-  return () => {
-    document.removeEventListener('mousedown', handleClickOutside);
-  };
-}, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <header className="bg-gradient-to-r from-blue-900 to-blue-700 text-white shadow-md">
@@ -52,17 +54,23 @@ useEffect(() => {
             </Link>
 
             {user ? (
-              <div className="relative group " ref={dropdownRef}>
+              <div className="relative group" ref={dropdownRef}>
                 <button
                   onClick={() => setDropdownOpen((prev) => !prev)}
                   className="flex items-center hover:text-blue-200 transition-colors"
                 >
-                  <span>{user.companyName || user.email}</span>
+                  <span>Hesabım</span>
                   <ChevronDown size={16} className="ml-1" />
                 </button>
                 {dropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-                    {user.role === "admin" && (
+                    <Link
+                      href="/profil-duzenle"
+                      className="block px-4 py-2 text-gray-800 hover:bg-blue-100"
+                    >
+                      Firmanı Düzenle
+                    </Link>
+                    {user.user_metadata?.role === 'admin'  && (
                       <Link
                         href="/admin"
                         className="block px-4 py-2 text-gray-800 hover:bg-blue-100"
@@ -70,12 +78,6 @@ useEffect(() => {
                         Admin Paneli
                       </Link>
                     )}
-                    <Link
-                      href="/profil-duzenle"
-                      className="block px-4 py-2 text-gray-800 hover:bg-blue-100"
-                    >
-                      Profil Düzenle
-                    </Link>
                     <button
                       onClick={handleLogout}
                       className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-100"
@@ -122,15 +124,6 @@ useEffect(() => {
 
             {user ? (
               <>
-                {user.role === "admin" && (
-                  <Link
-                    href="/admin"
-                    className="block py-2 hover:text-blue-200"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Admin Paneli
-                  </Link>
-                )}
                 <Link
                   href="/profil-duzenle"
                   className="block py-2 hover:text-blue-200"
@@ -138,6 +131,15 @@ useEffect(() => {
                 >
                   Profil Düzenle
                 </Link>
+                {user.user_metadata?.role === 'admin' && (
+                  <Link
+                    href="/admin"
+                    className="block py-2 pl-6 hover:text-blue-200"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Admin Paneli
+                  </Link>
+                )}
                 <button
                   onClick={() => {
                     handleLogout();

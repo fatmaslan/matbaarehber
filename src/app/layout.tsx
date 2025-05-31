@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-
 import "./globals.css";
+
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { AuthProvider } from "./context/AuthContext";
-
+import AdBanner from "./components/AdBanner";
 
 export const metadata: Metadata = {
   title: "matbaarehberi",
@@ -17,13 +17,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-      >
-        <AuthProvider> 
-        <Header/>
-       <div className="flex flex-col min-h-screen">{children}</div>
-        <Footer/>
+    <html lang="tr">
+      <body>
+        <AuthProvider>
+          <Header />
+          <div className="container mx-auto my-2">
+            <AdBanner position="top" />
+          </div>
+          <div className="flex flex-col lg:flex-row min-h-screen container mx-auto">
+            {/* SOL sadece büyük ekranlarda  */}
+            <aside className="hidden lg:block lg:w-1/5 p-2">
+              <AdBanner position="left" />
+            </aside>
+
+            <main className="flex-1 p-2">{children}</main>
+
+            {/* sağ sadece büyük ekranlarda */}
+            <aside className="hidden lg:block lg:w-1/5 p-2">
+              <AdBanner position="right" />
+            </aside>
+          </div>
+
+          <Footer />
         </AuthProvider>
       </body>
     </html>

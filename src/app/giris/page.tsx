@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { LoginFormData } from '../../../types';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import ReCAPTCHA from "react-google-recaptcha";
+
 
 const LoginPage: React.FC = () => {
   const router = useRouter();
@@ -21,6 +23,7 @@ const LoginPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
 
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   useEffect(() => {
     if (!loading && user) {
       router.push('/');
@@ -58,6 +61,11 @@ const LoginPage: React.FC = () => {
     setLoginError(null);
 
     if (!validate()) return;
+    
+  if (!recaptchaToken) {
+    setLoginError('Lütfen güvenlik doğrulamasını tamamlayın.');
+    return;
+  }
 
     setIsLoading(true);
 
@@ -75,7 +83,9 @@ const LoginPage: React.FC = () => {
 
     setIsLoading(false);
   };
-
+  const handleRecaptchaChange = (token: string | null) => {
+    setRecaptchaToken(token);
+  };
   if (loading) return <p className="p-4">Yükleniyor...</p>;
 
   return (
@@ -132,11 +142,14 @@ const LoginPage: React.FC = () => {
                 <p className="mt-1 text-red-500 text-sm">{errors.password}</p>
               )}
             </div>
-
+    <ReCAPTCHA
+              sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
+              onChange={handleRecaptchaChange}
+            />
             <button
               type="submit"
               disabled={isLoading}
-              className={`w-full bg-blue-600 text-white py-2 px-4 rounded-md font-medium ${
+              className={`w-full bg-blue-600 text-white py-2 px-4 rounded-md font-medium mt-2 ${
                 isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-blue-700'
               }`}
             >
