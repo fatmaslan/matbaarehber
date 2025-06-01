@@ -74,7 +74,7 @@ const CompanyDetailPage: React.FC = () => {
       if (error || !categoriesData) return result;
 
       categoriesData.forEach((category) => {
-        category.subcategories?.forEach((sub) => {
+        category.subcategories?.forEach((sub:{ id: string; name: string }) => {
           if (company.subcategoryIds.includes(sub.id)) {
             result.push({
               main: category.name,

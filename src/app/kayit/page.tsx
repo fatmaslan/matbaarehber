@@ -11,7 +11,6 @@ interface RegisterFormData {
   email: string;
   password: string;
   confirmPassword: string;
-  
 }
 
 const RegisterPage: React.FC = () => {
@@ -76,7 +75,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   setIsLoading(true);
 
   try {
-    // 1. Önce kendi 'users' tablonuzdan e-posta kontrolü yap
+    // 1. users_emails tablosunda e-posta var mı diye kontrol et (uygulamaya özel tablo)
     const { data: existingUsers, error: fetchError } = await supabase
       .from("users_emails")
       .select("email")
@@ -93,36 +92,54 @@ const handleSubmit = async (e: React.FormEvent) => {
       return;
     }
 
-    // 2. Kullanıcıyı Supabase Auth sistemine kaydet
-    const { data, error } = await supabase.auth.signUp({
+    // 2. Supabase Auth sistemine kayıt
+   const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
   email: formData.email,
   password: formData.password,
   options: {
-    user_metadata: {
+    data: {
       company_name: formData.companyName,
     },
   },
-    });
+});
 
-    if (error) {
-      setRegisterError(error.message);
+    if (signUpError) {
+      setRegisterError(signUpError.message);
       return;
     }
 
-    // 3. Eğer kullanıcı başarıyla oluşturulduysa, kendi 'users' tablosuna da ekle
-  
-    
+    // ⚠️ Eğer user.identities yoksa veya boşsa, kullanıcı daha önce kayıtlıdır
+    if (!signUpData.user?.identities || signUpData.user.identities.length === 0) {
+      setRegisterError("Bu e-posta adresi zaten kayıtlı. Lütfen giriş yapın.");
+      return;
+    }
 
-    // 4. Kullanıcıyı giriş sayfasına yönlendir
+    // 3. users_emails tablosuna kayıt
+    const insertResult = await supabase
+      .from("users_emails")
+      .insert([{ email: formData.email }]);
+
+    if (insertResult.error) {
+      console.error("users_emails tablosuna kayıt hatası:", insertResult.error.message);
+      setRegisterError("Kullanıcı oluşturuldu ancak veri tabanına kayıt edilemedi.");
+      return;
+    }
+
+    // 4. Başarılıysa giriş sayfasına yönlendir
     router.push("/giris");
-  } catch (error: any) {
+  } catch (error: unknown) {
+  if (error instanceof Error) {
     console.error("Kayıt hatası:", error.message);
     setRegisterError("Kayıt sırasında beklenmeyen bir hata oluştu.");
-  } finally {
+  } else {
+    console.error("Bilinmeyen kayıt hatası:", error);
+    setRegisterError("Bilinmeyen bir hata oluştu.");
+  }
+}
+finally {
     setIsLoading(false);
   }
 };
-
 
 
 
@@ -146,9 +163,7 @@ const handleSubmit = async (e: React.FormEvent) => {
             </div>
           )}
 
-          <form  onSubmit={handleSubmit}
-          >
-            
+          <form onSubmit={handleSubmit}>
             {/* Firma Adı */}
             <div className="mb-4">
               <label
@@ -265,7 +280,6 @@ const handleSubmit = async (e: React.FormEvent) => {
             >
               {isLoading ? "Kaydınız Oluşturuluyor..." : "Kayıt Ol"}
             </button>
-            
           </form>
 
           <div className="mt-6 text-center">

@@ -59,7 +59,7 @@ export interface RegisterFormData {
 export interface ProfileFormData {
   name: string;
   description: string;
-  logo: File | string;
+   logo: string;
   address: string;
   phone: string;
   fax?: string;

@@ -27,7 +27,7 @@ const ProfileEditPage: React.FC = () => {
     subcategoryIds: [],
     images: [],
     productImages: [],
-    logo: [],
+    logo: "",
   });
 
   const [errors, setErrors] = useState<
@@ -286,13 +286,20 @@ const ProfileEditPage: React.FC = () => {
 
       setSubmitSuccess(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (error: any) {
-      console.error(
-        "Dosya yükleme hatası:",
-        error.message,
-        error.status,
-        error.error
-      );
+    } catch (error: unknown) {
+      if (typeof error === "object" && error !== null) {
+        const err = error as {
+          message?: string;
+          status?: number;
+          error?: string;
+        };
+        console.error(
+          "Dosya yükleme hatası:",
+          err.message,
+          err.status,
+          err.error
+        );
+      }
       setSubmitError("Profil güncellenemedi. Lütfen tekrar deneyin.");
     } finally {
       setIsLoading(false);
@@ -407,17 +414,16 @@ const ProfileEditPage: React.FC = () => {
                   <div className="flex items-center">
                     <div className="w-20 h-20 bg-gray-100 rounded-md overflow-hidden flex items-center justify-center mr-4">
                       {formData.logo ? (
-                        formData.logo instanceof File ||
-                        formData.logo instanceof Blob ? (
+                        typeof formData.logo === "string" ? (
                           <img
-                            src={URL.createObjectURL(formData.logo)}
-                            alt="Logo önizleme"
+                            src={formData.logo}
+                            alt="Logo"
                             className="w-full h-full object-cover"
                           />
                         ) : (
                           <img
-                            src={formData.logo}
-                            alt="Logo"
+                            src={URL.createObjectURL(formData.logo)}
+                            alt="Logo önizleme"
                             className="w-full h-full object-cover"
                           />
                         )

@@ -1,10 +1,10 @@
 'use client';
 
 import {useEffect, useRef, useState} from 'react';
-import Link from 'next/link';
-import {Search, MapPin} from 'lucide-react';
 
-import {Company, Category, Subcategory} from '../../../types';
+import {Search} from 'lucide-react';
+
+import {Company} from '../../../types';
 import {supabase} from '../lib/supabaseClient';
 import {CategoryWithSubs} from "@/app/components/types";
 import CompanyCard from "@/app/components/CompanyCard";
