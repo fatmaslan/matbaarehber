@@ -43,6 +43,7 @@ const HomePage: React.FC = () => {
         fetchInitialData();
     }, []);
 
+    
 
     // Filtreleme işlemi
     const filteredCompanies = companies.filter((company) => {
